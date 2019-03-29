@@ -3,9 +3,9 @@ import os
 from PIL import Image
 
 path = os.getcwd()  
-print (path)
+# print (path)
 filename = os.listdir(path)  
-print (filename)
+# print (filename)
 label = []
 with open("./label.txt", "r") as f:
     for line in f:
@@ -24,11 +24,34 @@ for img_name in filename:
         continue
     img_path = path + '/' + img_name  
     img = Image.open(img_path).convert('RGB')
-    #img = img.convert("RGB")
-    img = img.resize((250, 250)) 
+    # print (img_name)
+    # print (img.size)
+    # print (img.mode)
+    # crop the center 5/6 box
+    w, h = img.size 
+    crop_size = int(min(w, h) * 5 / 6)
+    w_delta = int((w - crop_size) / 2)
+    h_delta = int((h - crop_size) / 2)
+    box = (w_delta, h_delta, w_delta + crop_size, h_delta + crop_size)
+    img = img.crop(box)
+    # print (img.size)
+    '''
+    Image.NEAREST : 低质量
+    Image.BILINEAR : 双线性
+    Image.BICUBIC : 三次样条插值
+    Image.ANTIALIAS : 高质量
+    '''
+    img = img.resize((250, 250), Image.ANTIALIAS) 
+    
+    save_flag = True
+    if save_flag:
+        # save resized-image for testing
+        save_name = path + '/test_imag/' + img_name.strip().split('.')[0] + '_resize.bmp'
+        img.save(save_name)
+    
     img_raw = img.tobytes()
     points = label[index]
-    print (type(points))
+    # print (type(points))
     index += 1
     example = tf.train.Example(
         features = tf.train.Features(
