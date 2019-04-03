@@ -32,7 +32,7 @@ def cnn_model_fn(features, labels, mode):
     # Computes 32 features using a 3x3 filter with ReLU activation.
     conv1 = tf.layers.conv2d(
         inputs=inputs,
-        filters=32,
+        filters=16,
         kernel_size=[3, 3],
         strides=(1, 1),
         padding='valid',
@@ -52,7 +52,7 @@ def cnn_model_fn(features, labels, mode):
     # Computes 64 features using a 3x3 filter with ReLU activation.
     conv2 = tf.layers.conv2d(
         inputs=pool1,
-        filters=64,
+        filters=16,
         kernel_size=[3, 3],
         strides=(1, 1),
         padding='valid',
@@ -62,7 +62,7 @@ def cnn_model_fn(features, labels, mode):
     # Computes 64 features using a 3x3 filter with ReLU activation.
     conv3 = tf.layers.conv2d(
         inputs=conv2,
-        filters=64,
+        filters=16,
         kernel_size=[3, 3],
         strides=(1, 1),
         padding='valid',
@@ -82,7 +82,7 @@ def cnn_model_fn(features, labels, mode):
     # Computes 64 features using a 3x3 filter with ReLU activation.
     conv4 = tf.layers.conv2d(
         inputs=pool2,
-        filters=64,
+        filters=32,
         kernel_size=[3, 3],
         strides=(1, 1),
         padding='valid',
@@ -92,7 +92,7 @@ def cnn_model_fn(features, labels, mode):
     # Computes 64 features using a 3x3 filter with ReLU activation.
     conv5 = tf.layers.conv2d(
         inputs=conv4,
-        filters=64,
+        filters=32,
         kernel_size=[3, 3],
         strides=(1, 1),
         padding='valid',
@@ -112,7 +112,7 @@ def cnn_model_fn(features, labels, mode):
     # Computes 128 features using a 3x3 filter with ReLU activation.
     conv6 = tf.layers.conv2d(
         inputs=pool3,
-        filters=128,
+        filters=64,
         kernel_size=[3, 3],
         strides=(1, 1),
         padding='valid',
@@ -122,7 +122,7 @@ def cnn_model_fn(features, labels, mode):
     # Conputes 128 features using a 3x3 filter with ReLU activation.
     conv7 = tf.layers.conv2d(
         inputs=conv6,
-        filters=128,
+        filters=64,
         kernel_size=[3, 3],
         strides=(1, 1),
         padding='valid',
@@ -141,7 +141,7 @@ def cnn_model_fn(features, labels, mode):
     # Convolutional layer
     conv8 = tf.layers.conv2d(
         inputs=pool4,
-        filters=256,
+        filters=128,
         kernel_size=[3, 3],
         strides=(1, 1),
         padding='valid',
@@ -258,8 +258,8 @@ def _train_input_fn():
     """Function for training."""
     return input_fn(
         record_file="./train.tfrecords", 
-        batch_size=2, 
-        num_epochs=50, 
+        batch_size=5, 
+        num_epochs=500, 
         shuffle=True)
 
 def _eval_input_fn():
