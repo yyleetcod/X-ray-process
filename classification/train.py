@@ -48,7 +48,7 @@ parser.add_argument('--train_path', type=str, default=root,
                     help="""image dir path default: './xray/⁩'.""") #这里是训练集的路径
 parser.add_argument('--test_path', type=str, default=root,
                     help="""image dir path default: './xray/⁩'.""")
-parser.add_argument('--epochs', type=int, default=200,
+parser.add_argument('--epochs', type=int, default=100,
                     help="""Epoch default:1000.""")
 parser.add_argument('--batch_size', type=int, default=5,
                     help="""Batch_size default:256.""")
@@ -58,7 +58,7 @@ parser.add_argument('--num_classes', type=int, default=3,
                     help="""num classes""") #分类的个数
 parser.add_argument('--model_path', type=str, default='./model/',
                     help="""Save model path""") #模型存储路径
-parser.add_argument('--model_name', type=str, default='real_classification.pth',
+parser.add_argument('--model_name', type=str, default='classification.pth',
                     help="""Model name.""") #模型名称
 parser.add_argument('--display_epoch', type=int, default=1) 
 
@@ -113,9 +113,11 @@ def train():
     # cast
     cast = nn.CrossEntropyLoss().to(device)
     # Optimization
-    optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-8)
+    #optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-8)
 
     for epoch in range(1, args.epochs + 1):
+        lr = args.lr * (0.5 ** (epoch // 10)) 
+        optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-8)
         model.train()
         # start time
         start = time.time()
@@ -136,7 +138,7 @@ def train():
             end = time.time()
             print(f"Epoch [{epoch}/{args.epochs}], "
                   f"Loss: {loss.item():.8f}, "
-                  f"Time: {(end-start) * args.display_epoch:.1f}sec!")
+                  f"Time: {(end-start) * args.display_epoch:.3f}sec!")
 
             model.eval()
 
