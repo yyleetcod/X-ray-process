@@ -1,10 +1,13 @@
 import os
-def file_name(file_dir):
-    for root, dirs, files in os.walk(file_dir):
-        #print('root_dir:', root)  # 当前目录路径
-        #print('sub_dirs:', dirs)  # 当前路径下所有子目录
+path = './xray'
+sep = '\n'
+fl=open('label_list.txt', 'w')
 
-        print(files)  # 当前路径下所有非目录子文件
-
-
-file_name('xray')
+def get_file(path):          #获取文件路径
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            dir_path = os.path.dirname(os.path.abspath(path))   
+            #print(os.path.join(dir_path,file))
+            fl.write(os.path.join(dir_path,file))
+            fl.write('\n')
+get_file(path)
