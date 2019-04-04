@@ -45,10 +45,10 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print (device)
 parser = argparse.ArgumentParser("""Image classifical!""")
 parser.add_argument('--train_path', type=str, default=root,
-                    help="""image dir path default: '‎⁨./xray/⁩'.""") #这里是训练集的路径
+                    help="""image dir path default: './xray/⁩'.""") #这里是训练集的路径
 parser.add_argument('--test_path', type=str, default=root,
                     help="""image dir path default: './xray/⁩'.""")
-parser.add_argument('--epochs', type=int, default=1000,
+parser.add_argument('--epochs', type=int, default=200,
                     help="""Epoch default:1000.""")
 parser.add_argument('--batch_size', type=int, default=5,
                     help="""Batch_size default:256.""")
@@ -126,7 +126,6 @@ def train():
             # Forward pass
             outputs = model(images)
             loss = cast(outputs, labels)
-            print("{}\t{}".format(i, loss))
 
             # Backward and optimize
             optimizer.zero_grad()
