@@ -1,0 +1,5 @@
+./xray/liuyufeng_L.bmp 0
+./xray/zhangyinfu_R.bmp 1
+./xray/liwenmin_L.bmp 1
+./xray/jiayurong_R.bmp 0
+./xray/liangshifu_R.bmp 2
