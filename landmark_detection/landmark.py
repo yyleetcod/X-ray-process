@@ -4,6 +4,7 @@ Convolutional Neural Network Estimator for facial landmark detection.
 
 import numpy as np
 import tensorflow as tf
+import time
 
 # import cv2
 
@@ -318,8 +319,10 @@ def main(unused_argv):
     mode = mode_dict['train']
 
     if mode == tf.estimator.ModeKeys.TRAIN:
+        start = time.time()
         estimator.train(input_fn=_train_input_fn, steps=2000000)
-
+        end = time.time()
+        print(f"Train Time: {(end - start):.3f}sec!")
         # Export result as SavedModel.
         # estimator.export_savedmodel('./saved_model', serving_input_receiver_fn)
 
@@ -349,7 +352,10 @@ def main(unused_argv):
         # estimator.export_savedmodel('./saved_model', serving_input_receiver_fn)
 
     elif mode == tf.estimator.ModeKeys.EVAL:
+        start = time.time()
         evaluation = estimator.evaluate(input_fn=_eval_input_fn)
+        end = time.time()
+        print(f"Eval Time: {(end - start):.3f}sec!")
         print(evaluation)
 
 
