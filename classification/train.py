@@ -71,7 +71,7 @@ if not os.path.exists(args.model_path):
 # 准备数据集并预处理
 transform_train = transforms.Compose([
     transforms.Pad(padding = 0),
-    transforms.CenterCrop(1000),  #先四周填充0，再把图像随机裁剪成32*32
+    transforms.CenterCrop(250),  #先四周填充0，再把图像随机裁剪成32*32
     transforms.RandomHorizontalFlip(),  #图像一半的概率翻转，一半的概率不翻转
     transforms.ToTensor(),
     #transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)), #R,G,B每层的归一化用到的均值和方差
@@ -79,7 +79,7 @@ transform_train = transforms.Compose([
 
 transform_test = transforms.Compose([
     transforms.Pad(padding = 0),
-    transforms.CenterCrop(1000), 
+    transforms.CenterCrop(250), 
     transforms.ToTensor(),
     #transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
 ])
@@ -107,8 +107,7 @@ def train():
     #     model = torch.load(args.model_path + args.model_name, map_location='cpu')
     model = torchvision.models.resnet18(pretrained = True)
     model.avgpool = nn.AvgPool2d(1, 1)
-    fc_in_size = model.fc.in_features
-    model.fc = nn.Linear(524288, args.num_classes)
+    model.fc = nn.Linear(32768, args.num_classes)
     model = model.to(device)
     # cast
     cast = nn.CrossEntropyLoss().to(device)
