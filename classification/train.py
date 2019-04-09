@@ -71,7 +71,7 @@ if not os.path.exists(args.model_path):
 # 准备数据集并预处理
 transform_train = transforms.Compose([
     transforms.Pad(padding = 0),
-    transforms.CenterCrop(250),  #先四周填充0，再把图像随机裁剪成32*32
+    transforms.RandomCrop(250),  #先四周填充0，再把图像随机裁剪成32*32
     transforms.RandomHorizontalFlip(),  #图像一半的概率翻转，一半的概率不翻转
     transforms.ToTensor(),
     #transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)), #R,G,B每层的归一化用到的均值和方差

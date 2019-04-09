@@ -8,8 +8,8 @@ import time
 
 # import cv2
 
-IMG_WIDTH = 250
-IMG_HEIGHT = 250
+IMG_WIDTH = 300
+IMG_HEIGHT = 300
 IMG_CHANNEL = 3
 
 #tf.logging.set_verbosity(tf.logging.INFO)
@@ -219,7 +219,7 @@ def _parse_function(record):
     # image_decoded = tf.image.decode_image(parsed_features['image'])
     image_decoded = tf.decode_raw(parsed_features['image'], tf.uint8)
     image_reshaped = tf.reshape(
-        image_decoded, [250, 250, 3])
+        image_decoded, [IMG_WIDTH, IMG_HEIGHT, IMG_CHANNEL])
     points = tf.cast(parsed_features['label'], tf.float32)
     return image_reshaped, points
 
