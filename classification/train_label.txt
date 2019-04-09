@@ -1,5 +1,4 @@
-/home/pku2321/Project2321/landmark_detection/test_imag/02_resize.bmp 0
-/home/pku2321/Project2321/landmark_detection/test_imag/01_resize.bmp 1
-/home/pku2321/Project2321/landmark_detection/test_imag/03_resize.bmp 1
-/home/pku2321/Project2321/landmark_detection/test_imag/05_resize.bmp 0
-/home/pku2321/Project2321/landmark_detection/test_imag/04_resize.bmp 2
+./xray/train/liuyufeng_L.bmp 1 0 0 1 0 0
+./xray/train/zhangyinfu_R.bmp 0 1 0 0 0 1
+./xray/train/liwenmin_L.bmp 0 1 0 0 1 0
+./xray/train/jiayurong_R.bmp 1 0 0 0 1 0
