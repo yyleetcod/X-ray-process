@@ -2,9 +2,9 @@ import tensorflow as tf
 import os
 from PIL import Image
 
-path = os.getcwd()  
+path = os.getcwd() 
 # print (path)
-filename = os.listdir(path)  
+filename = os.listdir(path + '/img')  
 # print (filename)
 label = []
 with open("./label.txt", "r") as f:
@@ -22,7 +22,7 @@ for img_name in filename:
     is_bmp = img_name.strip().split('.')[-1]
     if not is_bmp == "bmp":
         continue
-    img_path = path + '/' + img_name  
+    img_path = path + '/img/' + img_name  
     img = Image.open(img_path).convert('RGB')
     # print (img_name)
     # print (img.size)
