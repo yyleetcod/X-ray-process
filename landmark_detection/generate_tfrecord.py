@@ -41,7 +41,7 @@ for img_name in filename:
     Image.BICUBIC : 三次样条插值
     Image.ANTIALIAS : 高质量
     '''
-    img = img.resize((250, 250), Image.ANTIALIAS) 
+    img = img.resize((300, 300), Image.ANTIALIAS) 
     
     save_flag = True
     if save_flag:
