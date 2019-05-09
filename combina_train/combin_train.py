@@ -256,6 +256,7 @@ def train_input_fn(record_file, BATCH_SIZE):
     features, labels = iterator.get_next()
     return features, labels
 
+
 def eval_and_predict_input_fn(record_file, BATCH_SIZE, mod='eval'):
     """Input function required for TensorFlow Estimator."""
     dataset = tf.data.TFRecordDataset(record_file)
