@@ -5,18 +5,18 @@ import numpy as np
 import tensorflow as tf
 import time
 
-IMG_WIDTH = 300
-IMG_HEIGHT = 300
+IMG_WIDTH = 600
+IMG_HEIGHT = 600
 IMG_CHANNEL = 1
-L2_RATE = 8.0
+L2_RATE = 25.0
 BATCH_SIZE = 32
-TRAINING_STEP = 4000
-
+TRAINING_STEP = 2000
+USE_FOCAL = True
 
 def focal_loss(labels, logits, gamma=2):
     y_pred = tf.nn.softmax(logits, dim=-1) # [BATCH_SIZE,num_classes]
     labels = tf.one_hot(labels, depth=y_pred.shape[1])
-    loss = -labels * ((1 - y_pred) ** gamma) * tf.log(y_pred)
+    loss = -labels * ((1 - y_pred) ** gamma) * tf.log(tf.clip_by_value(y_pred, 1e-10, 1.0))
     loss = tf.reduce_sum(loss)
     return loss
 
@@ -40,7 +40,7 @@ def cnn_model_fn(features, labels, mode):
     #     IMG_WIDTH, IMG_HEIGHT, IMG_CHANNEL), 'Image size does not match.'
     # Concat front image and side image for input image 
     img = tf.concat([features['side_img'], features['front_img']], -1)
-    inputs = tf.to_float(img, name='input_to_float') / 256
+    inputs = 2 * (tf.to_float(img, name='input_to_float') / 256) - 1
 
     # conv1
     x = resnet_block(inputs, 64, [7, 7], 2)
@@ -134,6 +134,7 @@ def cnn_model_fn(features, labels, mode):
     # Make prediction for PREDICATION mode.
     predictions_dict = {
         # 'probabilities_thigh': probabilities_thigh,
+        'Index of Picture': features['index'],
         'Top3 Class of Thigh Bone': predict_thigh_index_top3,
         'Top3 Probability of Thigh Bone': predict_thigh_val_top3,
         'Label of Thigh Bone': features['thigh_bone'],
@@ -149,15 +150,24 @@ def cnn_model_fn(features, labels, mode):
     label_shin_tensor = tf.convert_to_tensor(labels['shin_bone'], dtype=tf.int64)
     # Caculate loss using mean squared error.
     # Sparse softmaxcrossentropy
-    '''
-    loss_thigh = tf.losses.sparse_softmax_cross_entropy(
-        labels=label_thigh_tensor, logits=logits_thigh)
-    loss_shin = tf.losses.sparse_softmax_cross_entropy(
-        labels=label_shin_tensor, logits=logits_shin)
-    '''
-    # Focal loss
-    loss_thigh = focal_loss(label_thigh_tensor, logits_thigh)
-    loss_shin = focal_loss(label_shin_tensor, logits_shin)
+   
+    if USE_FOCAL:
+        # Focal loss
+        loss_thigh = focal_loss(label_thigh_tensor, logits_thigh)
+        # pre_thigh_label = label_thigh_tensor - tf.cast(label_thigh_tensor > 0, tf.int64)
+        # next_thigh_label = label_thigh_tensor + tf.cast(label_thigh_tensor < 7, tf.int64)
+        # loss_thigh += 0.1 * focal_loss(pre_thigh_label, logits_thigh) + 0.1 * focal_loss(next_thigh_label, logits_thigh)
+        loss_shin = focal_loss(label_shin_tensor, logits_shin)
+        # pre_shin_label = label_shin_tensor - tf.cast(label_shin_tensor > 0, tf.int64)
+        # next_shin_label = label_shin_tensor + tf.cast(label_shin_tensor < 8, tf.int64)
+        # loss_shin += 0.1 * focal_loss(pre_shin_label, logits_shin) + 0.1 * focal_loss(next_shin_label, logits_shin)
+    else:
+        # Sparse softmaxcrossentropy
+        loss_thigh = tf.losses.sparse_softmax_cross_entropy(
+                labels=label_thigh_tensor, logits=logits_thigh)
+        loss_shin = tf.losses.sparse_softmax_cross_entropy(
+                labels=label_shin_tensor, logits=logits_shin)
+
     loss = loss_thigh + loss_shin
     # Regularization loss
     reg_loss = tf.losses.get_total_loss()
@@ -203,6 +213,7 @@ def cnn_model_fn(features, labels, mode):
 def _parse_function(record):
     """Extract data from a `tf.Example` protocol buffer."""
     keys_to_features = {
+        'index': tf.FixedLenFeature([], tf.int64), 
         'front_img': tf.FixedLenFeature([], tf.string),
         'side_img': tf.FixedLenFeature([], tf.string),
         'sex': tf.FixedLenFeature([], tf.int64),
@@ -224,7 +235,8 @@ def _parse_function(record):
     side_image_reshaped = tf.reshape(
         side_image_decoded, [IMG_WIDTH, IMG_HEIGHT, IMG_CHANNEL])
     
-    features = {'front_img': front_image_reshaped,
+    features = {'index': parsed_features['index'],
+            'front_img': front_image_reshaped,
             'side_img': side_image_reshaped,
             'sex': parsed_features['sex'],
             'height': parsed_features['height'],
@@ -308,7 +320,7 @@ def main(unused_argv):
     print('\nStart to train model')
     start = time.time()
     estimator.train(
-        input_fn=lambda: train_input_fn('./train_data.tfrecords', BATCH_SIZE), steps=TRAINING_STEP)
+            input_fn=lambda: train_input_fn('./train_data.tfrecords', BATCH_SIZE), steps=TRAINING_STEP)
     end = time.time()
     print('End to train model')
     print('-' * 100)
