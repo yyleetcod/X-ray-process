@@ -8,11 +8,11 @@ import time
 IMG_WIDTH = 320
 IMG_HEIGHT = 320
 IMG_CHANNEL = 1
-L2_RATE = 0.001
+L2_RATE = 0.0001
 LR = 0.0001
 BATCH_SIZE = 32
-TRAINING_STEP = 1000
-USE_FOCAL = False
+TRAINING_STEP = 6000
+USE_FOCAL = True
 thigh_shin_ration = 2.0
 
 
@@ -328,32 +328,39 @@ def cnn_model_fn(features, labels, mode):
     y = tf.layers.Flatten()(x)
 
     # Use sex, weight and height infomation to help model predict more accuracy
-    """
     sex = features['sex'] # tf.expand_dims(features['sex'], 1)
-    sex = tf.one_hot(sex, 2, 1.0, 0.0, dtype=tf.float32)
+    # sex = tf.one_hot(sex, 2, 1.0, 0.0, dtype=tf.float32)
+    
+    more_info = tf.to_float(sex)
+    more_info = tf.expand_dims(more_info, 1)
+    more_info = tf.concat([more_info, more_info], -1)
+    
     height = tf.expand_dims(features['height'], 1)
     weight = tf.expand_dims(features['weight'], 1)
-    more_info = tf.concat([sex, height, weight], -1)
+    
+    more_info = tf.concat([more_info, height, weight], -1)
+    # more_info = tf.concat([sex, height, weight], -1)
     # Pass a dense layer to make those information has a dimension comparable with feature map
     more_info = tf.layers.Dense(512, kernel_initializer='he_normal',
         kernel_regularizer=tf.contrib.layers.l2_regularizer(L2_RATE))(more_info)
     more_info = tf.nn.relu(more_info)
     y = tf.concat([y, more_info], -1)
-    """
+    
     y = tf.layers.Dense(1024, kernel_initializer='he_normal', 
         kernel_regularizer=tf.contrib.layers.l2_regularizer(L2_RATE))(y)
     y = tf.nn.relu(y)
-    logits = tf.layers.Dense(2, kernel_initializer='he_normal', 
+    logits = tf.layers.Dense(19, kernel_initializer='he_normal', 
         kernel_regularizer=tf.contrib.layers.l2_regularizer(L2_RATE))(y)
     
     # Split predict logits, the first 8 for thigh, the rest 9 for shin
+    logits_mura = logits[:, :2]
     """
-    logits_thigh = logits[:, :8]
-    logits_shin = logits[:, 8:]
+    logits_thigh = logits[:, 2:10]
+    logits_shin = logits[:, 10:]
     """
     # Prediction output
-    probabilities = tf.nn.softmax(logits)
-    predicted_classes = tf.argmax(logits, 1)
+    probabilities = tf.nn.softmax(logits_mura)
+    predicted_classes = tf.argmax(logits_mura, 1)
 
     """
     probabilities_thigh = tf.nn.softmax(logits_thigh)
@@ -367,9 +374,9 @@ def cnn_model_fn(features, labels, mode):
     # Make prediction for PREDICATION mode.
     predictions_dict = {
         'Index of Picture': features['index'],
-        'Label of Thigh Bone': features['label'],
-        'Predicted Class': predicted_classes,
-        'Probabilities': probabilities,
+        'Label of MURA': features['label'],
+        'Predicted Class of MURA': predicted_classes,
+        'Probabilities of MURA': probabilities,
 
         # 'probabilities_thigh': probabilities_thigh,
         # 'Index of Picture': features['index'],
@@ -392,7 +399,7 @@ def cnn_model_fn(features, labels, mode):
    
     if USE_FOCAL:
         # Focal loss
-        loss = focal_loss(label_tensor, logits)
+        loss = focal_loss(label_tensor, logits_mura)
         """
         loss_thigh = focal_loss(label_thigh_tensor, logits_thigh)
         pre_thigh_label = label_thigh_tensor - tf.cast(label_thigh_tensor > 0, tf.int64)
@@ -405,7 +412,7 @@ def cnn_model_fn(features, labels, mode):
         """
     else:
         # Sparse softmaxcrossentropy
-        loss = tf.losses.sparse_softmax_cross_entropy(label_tensor, logits)
+        loss = tf.losses.sparse_softmax_cross_entropy(label_tensor, logits_mura)
         """
         loss_thigh = tf.losses.sparse_softmax_cross_entropy(
                 labels=label_thigh_tensor, logits=logits_thigh)
